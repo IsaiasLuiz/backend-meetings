@@ -2,12 +2,16 @@ package com.meeting.itatiba.demo.controller;
 
 import java.util.List;
 
-import com.meeting.itatiba.demo.service.ServiceMeeting;
+import com.meeting.itatiba.demo.domain.exception.DateInvalidException;
 import com.meeting.itatiba.demo.domain.vo.MeetingVO;
+import com.meeting.itatiba.demo.service.ServiceMeeting;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,9 +34,18 @@ public class MeetingRequestController {
             value = "Salvar meeting"
     )
     @PostMapping
-    public void saveMeeting(@RequestBody MeetingVO meetingRequest) {
+    public ResponseEntity saveMeeting(@RequestBody MeetingVO meetingRequest) {
         log.info("saveMeeting, I=InitMethod");
-        serviceMeeting.saveMeeting(meetingRequest);
+
+        try {
+            serviceMeeting.saveMeeting(meetingRequest);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (DateInvalidException e) {
+            log.info("saveMeeting, E=erro ao salvar meeting");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @ApiOperation(
@@ -40,9 +53,20 @@ public class MeetingRequestController {
             response = MeetingVO.class
     )
     @GetMapping
-    public List<MeetingVO> listAll() {
+    public ResponseEntity<List<MeetingVO>> listAll() {
         log.info("listAll, I=InitMethod");
-        return serviceMeeting.searchAll();
+        return ResponseEntity.status(HttpStatus.OK).body(serviceMeeting.searchAll());
+    }
+
+    @ApiOperation(
+            value = "Apagar todas as meetings"
+    )
+    @DeleteMapping
+    public ResponseEntity deleteAll() {
+        log.info("M=deleteAll, I=InitMethod");
+        serviceMeeting.deleteAll();
+        log.info("M=deleteAll, I=endMethod");
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
 
