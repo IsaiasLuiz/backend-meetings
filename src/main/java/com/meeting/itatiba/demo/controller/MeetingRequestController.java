@@ -57,7 +57,9 @@ public class MeetingRequestController {
     @GetMapping
     public ResponseEntity<List<MeetingVO>> listAll() {
         log.info("listAll, I=InitMethod");
-        return ResponseEntity.status(HttpStatus.OK).body(serviceMeeting.searchAll());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(serviceMeeting.searchAll());
     }
 
     @ApiOperation(
